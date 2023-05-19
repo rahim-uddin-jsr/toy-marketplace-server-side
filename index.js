@@ -26,6 +26,17 @@ async function run() {
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
+
+    const kiddoZone1 = client.db("kiddoZone1");
+
+    const toysCollection = kiddoZone1.collection("toysCollection");
+
+    app.post("/toys", async (req, res) => {
+      console.log("hitted");
+      const updatedDoc = req.body;
+      const result = await toysCollection.insertOne(updatedDoc);
+      res.send(result);
+    });
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
