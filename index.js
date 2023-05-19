@@ -31,6 +31,20 @@ async function run() {
 
     const toysCollection = kiddoZone1.collection("toysCollection");
     app.get("/toys", async (req, res) => {
+      const searchText = req.query.search;
+      if (searchText) {
+        // res.send(searchText);
+        const query = {
+          productName: {
+            $regex: new RegExp(searchText, "i"), // 'i' indicates case-insensitive search
+          },
+        };
+
+        const result = await toysCollection.find(query).toArray();
+        console.log(result);
+        res.send(result);
+        return;
+      }
       const result = await toysCollection.find().toArray();
       res.send(result);
     });
@@ -40,7 +54,7 @@ async function run() {
       const result = await toysCollection.find({ email: email }).toArray();
       res.send(result);
     });
-    
+
     app.get("/toys/:category", async (req, res) => {
       const category = req.params.category;
       const result = await toysCollection
