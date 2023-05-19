@@ -34,6 +34,13 @@ async function run() {
       const result = await toysCollection.find().toArray();
       res.send(result);
     });
+
+    app.get("/toys/:email", async (req, res) => {
+      const email = req.params.email;
+      const result = await toysCollection.find({ email: email }).toArray();
+      res.send(result);
+    });
+    
     app.get("/toys/:category", async (req, res) => {
       const category = req.params.category;
       const result = await toysCollection
