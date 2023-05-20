@@ -31,6 +31,15 @@ async function run() {
 
     const toysCollection = kiddoZone1.collection("toysCollection");
     app.get("/toys", async (req, res) => {
+      const category = req.query.category;
+      if (category) {
+        const result = await toysCollection
+          .find({ subCategory: category })
+          .toArray();
+        res.send(result);
+        return;
+      }
+      // search implementation
       const searchText = req.query.search;
       if (searchText) {
         const query = {
@@ -44,20 +53,32 @@ async function run() {
         res.send(result);
         return;
       }
-      const result = await toysCollection.find().toArray();
+      const result = await toysCollection.find().limit(20).toArray();
       res.send(result);
     });
 
     app.get("/toys/:email", async (req, res) => {
+      const sortQuery = req.query.sort;
+      console.log(sortQuery);
       const email = req.params.email;
-      const result = await toysCollection.find({ email: email }).toArray();
-      res.send(result);
-    });
-
-    app.get("/toys/:category", async (req, res) => {
-      const category = req.params.category;
+      let options;
+      if (sortQuery) {
+        if (sortQuery === "ascending") {
+          options = {
+            sort: {
+              price: 1,
+            },
+          };
+        } else {
+          options = {
+            sort: {
+              price: -1,
+            },
+          };
+        }
+      }
       const result = await toysCollection
-        .find({ subCategory: category })
+        .find({ email: email }, options)
         .toArray();
       res.send(result);
     });
