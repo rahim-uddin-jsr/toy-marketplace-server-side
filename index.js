@@ -6,7 +6,7 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.ztr719a.mongodb.net/?retryWrites=true&w=majority`;
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -33,7 +33,6 @@ async function run() {
     app.get("/toys", async (req, res) => {
       const searchText = req.query.search;
       if (searchText) {
-        // res.send(searchText);
         const query = {
           productName: {
             $regex: new RegExp(searchText, "i"), // 'i' indicates case-insensitive search
@@ -60,6 +59,14 @@ async function run() {
       const result = await toysCollection
         .find({ subCategory: category })
         .toArray();
+      res.send(result);
+    });
+
+    app.get("/toy/:id", async (req, res) => {
+      const id = req.params.id;
+      const result = await toysCollection.findOne({
+        _id: new ObjectId(id),
+      });
       res.send(result);
     });
 
