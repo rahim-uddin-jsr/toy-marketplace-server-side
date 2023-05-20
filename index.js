@@ -71,9 +71,15 @@ async function run() {
     });
 
     app.post("/toys", async (req, res) => {
-      console.log("hitted");
       const updatedDoc = req.body;
       const result = await toysCollection.insertOne(updatedDoc);
+      res.send(result);
+    });
+    app.delete("/toys/:id", async (req, res) => {
+      const id = req.params.id;
+      const result = await toysCollection.deleteOne({
+        _id: new ObjectId(id),
+      });
       res.send(result);
     });
   } finally {
