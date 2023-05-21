@@ -7,6 +7,7 @@ app.use(cors());
 app.use(express.json());
 
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const { query } = require("express");
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.ztr719a.mongodb.net/?retryWrites=true&w=majority`;
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -30,11 +31,14 @@ async function run() {
     const kiddoZone1 = client.db("kiddoZone1");
 
     const toysCollection = kiddoZone1.collection("toysCollection");
+
+    // get all toys, using query parameter also get by sub category and also react data by search query
     app.get("/toys", async (req, res) => {
-      const category = req.query.category;
-      if (category) {
+      // get by category
+      const subCategory = req.query.category;
+      if (subCategory) {
         const result = await toysCollection
-          .find({ subCategory: category })
+          .find({ subCategory: subCategory })
           .toArray();
         res.send(result);
         return;
@@ -49,18 +53,19 @@ async function run() {
         };
 
         const result = await toysCollection.find(query).toArray();
-        console.log(result);
         res.send(result);
         return;
       }
+      // get 20 data with out search and subcategory
       const result = await toysCollection.find().limit(20).toArray();
       res.send(result);
     });
 
+    // get toys by use  email with and with out sorting
     app.get("/toys/:email", async (req, res) => {
-      const sortQuery = req.query.sort;
-      console.log(sortQuery);
       const email = req.params.email;
+      // for sort
+      const sortQuery = req.query.sort;
       let options;
       if (sortQuery) {
         if (sortQuery === "ascending") {
@@ -82,7 +87,7 @@ async function run() {
         .toArray();
       res.send(result);
     });
-
+    // get a single toy by id
     app.get("/toy/:id", async (req, res) => {
       const id = req.params.id;
       const result = await toysCollection.findOne({
@@ -90,13 +95,13 @@ async function run() {
       });
       res.send(result);
     });
-
+    // add a toy
     app.post("/toys", async (req, res) => {
       const updatedDoc = req.body;
       const result = await toysCollection.insertOne(updatedDoc);
       res.send(result);
     });
-
+    // update existing toys details
     app.patch("/toys", async (req, res) => {
       const updatedToys = req.body;
       const id = updatedToys._id;
@@ -115,10 +120,9 @@ async function run() {
         },
       };
       const result = await toysCollection.updateOne(filter, updateDoc);
-      console.log(result);
       res.send(result);
     });
-
+    // delete a single item by id
     app.delete("/toys/:id", async (req, res) => {
       const id = req.params.id;
       const result = await toysCollection.deleteOne({
